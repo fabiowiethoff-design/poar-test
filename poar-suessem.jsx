@@ -1,0 +1,1024 @@
+import { useState, useEffect, useRef } from "react";
+
+// ─── Icons (inline SVG components) ───
+const Icons = {
+  Cross: ({ size = 24 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M12 2v20M7 7h10" />
+    </svg>
+  ),
+  Menu: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M3 12h18M3 6h18M3 18h18" />
+    </svg>
+  ),
+  Close: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M18 6L6 18M6 6l12 12" />
+    </svg>
+  ),
+  ChevronRight: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M9 18l6-6-6-6" />
+    </svg>
+  ),
+  Calendar: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
+    </svg>
+  ),
+  Church: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M12 2v4M10 6h4M8 6v4l-5 4v8h18v-8l-5-4V6" /><path d="M10 22v-5a2 2 0 014 0v5" />
+    </svg>
+  ),
+  Book: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M4 19.5A2.5 2.5 0 016.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+    </svg>
+  ),
+  Users: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+    </svg>
+  ),
+  FileText: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+    </svg>
+  ),
+  Download: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+    </svg>
+  ),
+  Upload: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+    </svg>
+  ),
+  MapPin: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
+    </svg>
+  ),
+  Clock: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
+    </svg>
+  ),
+  Star: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+    </svg>
+  ),
+  Lock: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
+    </svg>
+  ),
+  Edit: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+  ),
+  Quote: () => (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" opacity="0.15">
+      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151C7.546 6.068 5.983 8.789 5.983 11H10v10H0z" />
+    </svg>
+  ),
+  Pray: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M12 22c1-4 4-6 4-10a4 4 0 00-8 0c0 4 3 6 4 10z" /><path d="M12 2v4" />
+    </svg>
+  ),
+};
+
+// ─── Data ───
+const MASS_SCHEDULE = [
+  { day: "Samschdeg", time: "17:30", church: "Suessem", type: "Vigielmass" },
+  { day: "Sonndeg", time: "08:30", church: "Bieles", type: "Sonndessmass" },
+  { day: "Sonndeg", time: "10:00", church: "Suessem", type: "Sonndessmass" },
+  { day: "Sonndeg", time: "11:15", church: "Zolwer", type: "Sonndessmass" },
+  { day: "Mëttwoch", time: "18:30", church: "Suessem", type: "Wochenmass" },
+];
+
+const EVENTS = [
+  { date: "15 Jun", title: "Éischt Helleg Kommioun", location: "Kierch Suessem", tag: "Kommioun" },
+  { date: "22 Jun", title: "KiKaKi Summerfest", location: "Katechesesall", tag: "KiKaKi" },
+  { date: "28 Jun", title: "Lidder Prouf", location: "Kierch Suessem", tag: "Kommioun" },
+  { date: "06 Jul", title: "Kräiziwwerreechung", location: "Kierch Suessem", tag: "Kommioun" },
+  { date: "13 Jul", title: "Generalprouf", location: "Kierch Suessem", tag: "Kommioun" },
+];
+
+const CHURCHES = [
+  { name: "Kierch Suessem", type: "Summerkierch & Wanterkierch", img: "🏛️" },
+  { name: "Kierch Bieles", type: "Summerkierch", img: "⛪" },
+  { name: "Kierch Zolwer", type: "Summerkierch", img: "⛪" },
+];
+
+const WEEKS_INFO = {
+  A: { color: "#C4A35A", label: "Woch A", desc: "Katechese Grupp A — Suessem" },
+  B: { color: "#7B8F6B", label: "Woch B", desc: "Katechese Grupp B — Bieles" },
+  C: { color: "#8B6F7B", label: "Woch C", desc: "Katechese Grupp C — Zolwer" },
+};
+
+const FAQ_ITEMS = [
+  { q: "Wéi mellt een sech fir d'Kateches un?", a: "Fëllt d'Fiche d'inscription aus an bezuelt den Aschreiwungsgebür vun 20€. Dir kënnt dat online oder virun Uert maachen." },
+  { q: "Wat ass de Summer- / Wanterkierch System?", a: "Am Wanter gëtt nëmmen eng Kierch geheitzt an ass a Betrieb (Wanterkierch). Am Summer wiesselt d'Sonndessmass all Woch an eng aner Kierch (Summerkierch)." },
+  { q: "Wou fanne mir Parkméiglechkeeten?", a: "Ronderëm all Kierch ginn et Parkplazen. Kuckt d'Kaart op der Kierchen-Säit fir genee Plazen." },
+  { q: "Wéi eng Bibelen gi recommandéiert?", a: "Kuckt eis Empfeelungen am Beräich 'Bibelen virstellen' fir verschidden Ausgaben déi fir Kanner a Famill geduecht sinn." },
+  { q: "Wat ass d'Tunique fir d'Kommioun?", a: "All Kommiounskanner kréien eng wäiss Tunique. Detailer iwwer Gréissten an Ofhuelung ginn am Viraus matgedeelt." },
+  { q: "Wou fanne mir d'Lidderprogramm?", a: "D'Lidderprogramm fir all Mass ass als PDF verfügbar am Beräich 'Dokumenter'." },
+];
+
+const QUOTES = [
+  { text: "Kommt bei mech, dir alleguer, déi dir midd sidd an iwwerlaascht, ech wäert iech Rou ginn.", source: "Mt 11,28" },
+  { text: "Well esou huet Gott d'Welt gär gehat, datt hien säin eenzege Jong ginn huet.", source: "Joh 3,16" },
+  { text: "Ech sinn de Wee, d'Wouerecht an d'Liewen.", source: "Joh 14,6" },
+];
+
+const DOCUMENTS = [
+  { name: "Lidderprogramm – Juni 2026", date: "01.06.2026", type: "PDF" },
+  { name: "Fürbitte – 5. Sonndeg Ouschterzäit", date: "25.05.2026", type: "PDF" },
+  { name: "Katechese Kalenner 2025-2026", date: "01.09.2025", type: "PDF" },
+  { name: "Fiche d'inscription Kateches", date: "01.09.2025", type: "PDF" },
+  { name: "Iwwerbleck iwwert ganzt Joer", date: "01.09.2025", type: "PDF" },
+];
+
+const BENEVOL_TASKS = [
+  { task: "Liese fir d'Sonndessmass", needed: 2, filled: 1, date: "15 Jun" },
+  { task: "Kierch botzen", needed: 3, filled: 1, date: "20 Jun" },
+  { task: "Accueil bei der Kommioun", needed: 4, filled: 2, date: "22 Jun" },
+  { task: "Blummen stellen", needed: 2, filled: 0, date: "22 Jun" },
+];
+
+// ─── Main App ───
+export default function PoarSuessem() {
+  const [currentPage, setCurrentPage] = useState("home");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [loginUser, setLoginUser] = useState("");
+  const [loginPass, setLoginPass] = useState("");
+  const [editingSection, setEditingSection] = useState(null);
+  const [editText, setEditText] = useState("");
+  const [customTexts, setCustomTexts] = useState({});
+  const [expandedFaq, setExpandedFaq] = useState(null);
+  const [animatedIn, setAnimatedIn] = useState(false);
+  const heroRef = useRef(null);
+
+  useEffect(() => {
+    setAnimatedIn(false);
+    const t = setTimeout(() => setAnimatedIn(true), 50);
+    return () => clearTimeout(t);
+  }, [currentPage]);
+
+  const nav = [
+    { id: "home", label: "Startsäit" },
+    { id: "kateches", label: "Kateches" },
+    { id: "kommioun", label: "Kommioun" },
+    { id: "kierchen", label: "Kierchen" },
+    { id: "documents", label: "Dokumenter" },
+    { id: "benevolen", label: "Benevolen" },
+    { id: "faq", label: "FAQ" },
+  ];
+
+  const handleLogin = () => {
+    if (loginUser === "admin" && loginPass === "poar2026") {
+      setIsAdmin(true);
+      setShowLogin(false);
+      setLoginUser("");
+      setLoginPass("");
+    }
+  };
+
+  const startEdit = (sectionId, defaultText) => {
+    setEditingSection(sectionId);
+    setEditText(customTexts[sectionId] || defaultText);
+  };
+
+  const saveEdit = () => {
+    if (editingSection) {
+      setCustomTexts({ ...customTexts, [editingSection]: editText });
+      setEditingSection(null);
+    }
+  };
+
+  const getText = (sectionId, defaultText) => customTexts[sectionId] || defaultText;
+
+  // ─── Editable wrapper ───
+  const Editable = ({ id, defaultText, as: Tag = "p", className = "" }) => (
+    <div style={{ position: "relative", display: "inline" }}>
+      <Tag className={className}>{getText(id, defaultText)}</Tag>
+      {isAdmin && (
+        <button
+          onClick={() => startEdit(id, defaultText)}
+          style={{
+            position: "absolute", top: -8, right: -8,
+            background: "#C4A35A", border: "none", borderRadius: "50%",
+            width: 28, height: 28, display: "flex", alignItems: "center",
+            justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
+          }}
+        >
+          <Icons.Edit />
+        </button>
+      )}
+    </div>
+  );
+
+  // ─── Styles ───
+  const styles = {
+    root: {
+      fontFamily: "'Crimson Pro', 'Georgia', serif",
+      background: "#FAF8F5",
+      color: "#2C2419",
+      minHeight: "100vh",
+      fontSize: 16,
+      lineHeight: 1.7,
+      overflowX: "hidden",
+    },
+    nav: {
+      position: "sticky", top: 0, zIndex: 100,
+      background: "rgba(250, 248, 245, 0.95)",
+      backdropFilter: "blur(12px)",
+      borderBottom: "1px solid rgba(196, 163, 90, 0.2)",
+      padding: "0 24px",
+    },
+    navInner: {
+      maxWidth: 1200, margin: "0 auto",
+      display: "flex", alignItems: "center", justifyContent: "space-between",
+      height: 72,
+    },
+    logo: {
+      display: "flex", alignItems: "center", gap: 12, cursor: "pointer",
+      fontFamily: "'Cormorant Garamond', serif",
+      fontSize: 22, fontWeight: 600, letterSpacing: "-0.02em",
+      color: "#2C2419",
+    },
+    navLinks: {
+      display: "flex", gap: 8, alignItems: "center",
+    },
+    navLink: (active) => ({
+      padding: "8px 16px", border: "none", borderRadius: 6,
+      background: active ? "rgba(196, 163, 90, 0.15)" : "transparent",
+      color: active ? "#8B6914" : "#6B5D4D",
+      fontFamily: "'Crimson Pro', serif", fontSize: 15, fontWeight: active ? 600 : 400,
+      cursor: "pointer", transition: "all 0.2s",
+      letterSpacing: "0.01em",
+    }),
+    hero: {
+      position: "relative", overflow: "hidden",
+      background: "linear-gradient(135deg, #2C2419 0%, #4A3B2A 40%, #3D3225 100%)",
+      color: "#FAF8F5", padding: "100px 24px 80px",
+      textAlign: "center",
+    },
+    heroPattern: {
+      position: "absolute", inset: 0, opacity: 0.06,
+      backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(196,163,90,0.5) 35px, rgba(196,163,90,0.5) 36px)`,
+    },
+    section: {
+      maxWidth: 1000, margin: "0 auto", padding: "64px 24px",
+    },
+    sectionTitle: {
+      fontFamily: "'Cormorant Garamond', serif",
+      fontSize: 36, fontWeight: 300, letterSpacing: "-0.02em",
+      marginBottom: 8, color: "#2C2419",
+    },
+    sectionSub: {
+      fontSize: 15, color: "#8B7D6B", marginBottom: 40,
+      fontStyle: "italic",
+    },
+    card: {
+      background: "#FFFFFF", borderRadius: 12,
+      border: "1px solid rgba(196, 163, 90, 0.15)",
+      padding: 28, marginBottom: 16,
+      transition: "all 0.3s ease",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+    },
+    goldBtn: {
+      display: "inline-flex", alignItems: "center", gap: 8,
+      padding: "14px 32px", background: "#C4A35A", color: "#FFF",
+      border: "none", borderRadius: 8, fontSize: 15, fontWeight: 600,
+      fontFamily: "'Crimson Pro', serif",
+      cursor: "pointer", letterSpacing: "0.03em",
+      transition: "all 0.3s",
+      boxShadow: "0 2px 12px rgba(196,163,90,0.3)",
+    },
+    outlineBtn: {
+      display: "inline-flex", alignItems: "center", gap: 8,
+      padding: "12px 24px", background: "transparent",
+      color: "#8B6914", border: "2px solid rgba(196,163,90,0.4)",
+      borderRadius: 8, fontSize: 14, fontWeight: 600,
+      fontFamily: "'Crimson Pro', serif",
+      cursor: "pointer", letterSpacing: "0.03em",
+    },
+    tag: (color) => ({
+      display: "inline-block", padding: "4px 12px",
+      background: color + "20", color: color,
+      borderRadius: 20, fontSize: 12, fontWeight: 600,
+      letterSpacing: "0.05em", textTransform: "uppercase",
+    }),
+    adminBar: {
+      background: "linear-gradient(90deg, #2C2419, #4A3B2A)",
+      color: "#C4A35A", padding: "8px 24px",
+      display: "flex", alignItems: "center", justifyContent: "space-between",
+      fontSize: 13, fontWeight: 600, letterSpacing: "0.05em",
+    },
+    mobileMenu: {
+      position: "fixed", inset: 0, zIndex: 200,
+      background: "rgba(250, 248, 245, 0.98)", backdropFilter: "blur(20px)",
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center", gap: 8,
+    },
+    footer: {
+      background: "#2C2419", color: "#A09585", padding: "48px 24px",
+      textAlign: "center", fontSize: 14,
+    },
+  };
+
+  // ─── Page Renderers ───
+  const renderHome = () => (
+    <>
+      <div style={styles.hero} ref={heroRef}>
+        <div style={styles.heroPattern} />
+        <div style={{
+          position: "relative", zIndex: 1, maxWidth: 700, margin: "0 auto",
+          opacity: animatedIn ? 1 : 0, transform: animatedIn ? "translateY(0)" : "translateY(30px)",
+          transition: "all 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
+        }}>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 24, color: "#C4A35A" }}>
+            <Icons.Cross size={48} />
+          </div>
+          <h1 style={{
+            fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(36px, 6vw, 56px)",
+            fontWeight: 300, letterSpacing: "-0.03em", lineHeight: 1.15, marginBottom: 16,
+          }}>
+            <Editable id="hero-title" defaultText="Kateches an der Poar Suessem" as="span" />
+          </h1>
+          <p style={{
+            fontSize: 18, color: "#B8AC9A", maxWidth: 500, margin: "0 auto 40px",
+            fontStyle: "italic", lineHeight: 1.6,
+          }}>
+            <Editable id="hero-sub" defaultText="Zesumme wuessen am Glawen — Eng Gemeinschaft fir Famill a Kanner" as="span" />
+          </p>
+          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
+            <button style={styles.goldBtn} onClick={() => setCurrentPage("kateches")}>
+              Aschreiwung <Icons.ChevronRight />
+            </button>
+            <button style={{ ...styles.outlineBtn, color: "#C4A35A", borderColor: "rgba(196,163,90,0.4)" }}
+              onClick={() => setCurrentPage("kierchen")}>
+              Eis Kierchen
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Quote */}
+      <div style={{ background: "#F5F0E8", padding: "48px 24px", textAlign: "center" }}>
+        <div style={{ maxWidth: 600, margin: "0 auto", position: "relative" }}>
+          <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", color: "#C4A35A" }}>
+            <Icons.Quote />
+          </div>
+          <p style={{
+            fontFamily: "'Cormorant Garamond', serif", fontSize: 24,
+            fontStyle: "italic", fontWeight: 300, color: "#4A3B2A",
+            lineHeight: 1.6, marginBottom: 8, paddingTop: 16,
+          }}>
+            {QUOTES[0].text}
+          </p>
+          <span style={{ fontSize: 13, color: "#8B7D6B", fontWeight: 600, letterSpacing: "0.1em" }}>
+            — {QUOTES[0].source}
+          </span>
+        </div>
+      </div>
+
+      {/* Quick Info Cards */}
+      <div style={styles.section}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
+          {[
+            { icon: <Icons.Calendar />, title: "Nächst Mass", desc: getText("next-mass", "Samschdeg 17:30 — Kierch Suessem"), color: "#C4A35A" },
+            { icon: <Icons.Users />, title: "Kateches", desc: getText("kateches-info", "Aschreiwung oppen — 20€ pro Joer"), color: "#7B8F6B" },
+            { icon: <Icons.Pray />, title: "Anbetung", desc: getText("anbetung-info", "All Donneschdeg 17:00–18:00 — Kierch Suessem"), color: "#8B6F7B" },
+          ].map((item, i) => (
+            <div key={i} style={{
+              ...styles.card, position: "relative", overflow: "hidden",
+              opacity: animatedIn ? 1 : 0,
+              transform: animatedIn ? "translateY(0)" : "translateY(20px)",
+              transition: `all 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${i * 0.15}s`,
+            }}>
+              <div style={{
+                position: "absolute", top: 0, left: 0, right: 0, height: 3,
+                background: item.color,
+              }} />
+              <div style={{ color: item.color, marginBottom: 12 }}>{item.icon}</div>
+              <h3 style={{
+                fontFamily: "'Cormorant Garamond', serif", fontSize: 22,
+                fontWeight: 600, marginBottom: 8,
+              }}>{item.title}</h3>
+              <p style={{ fontSize: 15, color: "#6B5D4D", margin: 0 }}>
+                {isAdmin ? (
+                  <Editable id={`card-${i}`} defaultText={item.desc} as="span" />
+                ) : item.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Mass Schedule */}
+      <div style={{ background: "#FFFFFF", padding: "64px 24px" }}>
+        <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+          <h2 style={styles.sectionTitle}>Massenziedel</h2>
+          <p style={styles.sectionSub}>Régelmässeg Gottesdéngschter an eise Kierchen</p>
+          <div style={{ display: "grid", gap: 8 }}>
+            {MASS_SCHEDULE.map((m, i) => (
+              <div key={i} style={{
+                display: "grid", gridTemplateColumns: "120px 80px 1fr auto",
+                gap: 16, alignItems: "center", padding: "16px 20px",
+                background: i % 2 === 0 ? "#FAF8F5" : "#FFFFFF",
+                borderRadius: 8,
+              }}>
+                <span style={{ fontWeight: 600, fontSize: 15 }}>{m.day}</span>
+                <span style={{ color: "#C4A35A", fontWeight: 700, fontFamily: "monospace", fontSize: 15 }}>{m.time}</span>
+                <span style={{ color: "#6B5D4D" }}>{m.church}</span>
+                <span style={styles.tag("#7B8F6B")}>{m.type}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Events Preview */}
+      <div style={styles.section}>
+        <h2 style={styles.sectionTitle}>Nächst Evenementer</h2>
+        <p style={styles.sectionSub}>Wat gesäit — Kommioun, KiKaKi, Katechese</p>
+        <div style={{ display: "grid", gap: 12 }}>
+          {EVENTS.slice(0, 4).map((ev, i) => (
+            <div key={i} style={{
+              ...styles.card, display: "flex", alignItems: "center", gap: 20,
+              padding: "20px 24px",
+            }}>
+              <div style={{
+                minWidth: 56, height: 56, borderRadius: 10,
+                background: "linear-gradient(135deg, #C4A35A, #D4B56A)",
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                color: "#FFF", fontWeight: 700,
+              }}>
+                <span style={{ fontSize: 18, lineHeight: 1 }}>{ev.date.split(" ")[0]}</span>
+                <span style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em" }}>{ev.date.split(" ")[1]}</span>
+              </div>
+              <div style={{ flex: 1 }}>
+                <h4 style={{ margin: "0 0 4px", fontSize: 17, fontWeight: 600 }}>{ev.title}</h4>
+                <span style={{ fontSize: 13, color: "#8B7D6B", display: "flex", alignItems: "center", gap: 6 }}>
+                  <Icons.MapPin /> {ev.location}
+                </span>
+              </div>
+              <span style={styles.tag(ev.tag === "Kommioun" ? "#8B6F7B" : "#7B8F6B")}>{ev.tag}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+
+  const renderKateches = () => (
+    <div style={styles.section}>
+      <h2 style={styles.sectionTitle}>Kateches</h2>
+      <p style={styles.sectionSub}>Glawenserzéiung fir Kanner an der Poar Suessem</p>
+
+      {/* Inscription */}
+      <div style={{ ...styles.card, background: "linear-gradient(135deg, #FAF8F5, #F5F0E8)", marginBottom: 32 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+          <span style={styles.tag("#C4A35A")}>Aschreiwung</span>
+          <span style={{ fontSize: 24, fontWeight: 700, color: "#C4A35A" }}>20€</span>
+        </div>
+        <Editable id="kateches-inscription"
+          defaultText="D'Aschreiwung fir d'Kateches ass oppen. Fëllt d'Fiche d'inscription aus, bezuelt den Aschreiwungsgebür vun 20€, an Dir sidd ugemellt. D'Fiche d'inscription fannt Dir ënnert 'Dokumenter'."
+          className="" />
+        <button style={{ ...styles.goldBtn, marginTop: 20 }} onClick={() => setCurrentPage("documents")}>
+          Fiche d'inscription <Icons.Download />
+        </button>
+      </div>
+
+      {/* A/B/C Weeks */}
+      <h3 style={{ ...styles.sectionTitle, fontSize: 26, marginBottom: 24 }}>A, B, C Wochen</h3>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 40 }}>
+        {Object.entries(WEEKS_INFO).map(([key, w]) => (
+          <div key={key} style={{
+            ...styles.card, borderTop: `4px solid ${w.color}`, textAlign: "center",
+          }}>
+            <div style={{
+              width: 48, height: 48, borderRadius: "50%",
+              background: w.color + "20", color: w.color,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              margin: "0 auto 12px", fontSize: 22, fontWeight: 700,
+              fontFamily: "'Cormorant Garamond', serif",
+            }}>{key}</div>
+            <h4 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 8px" }}>{w.label}</h4>
+            <p style={{ fontSize: 14, color: "#6B5D4D", margin: 0 }}>{w.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* New Katechesesall */}
+      <div style={{
+        ...styles.card,
+        background: "linear-gradient(135deg, #2C2419, #4A3B2A)",
+        color: "#FAF8F5",
+      }}>
+        <span style={styles.tag("#C4A35A")}>Nei</span>
+        <h3 style={{
+          fontFamily: "'Cormorant Garamond', serif", fontSize: 28,
+          fontWeight: 300, margin: "16px 0 12px",
+        }}>De neie Katechesesall</h3>
+        <Editable id="katechesesall"
+          defaultText="Eise neie Katechesesall bitt Plaz fir bis zu 60 Kanner mat modernem Equipment, engem groussen Ecran, a gemittleche Sëtzméiglechkeeten. De Sall kann och fir Reuniounen a kleng Evenementer genotzt ginn."
+          as="p" className="" />
+      </div>
+
+      {/* Parking */}
+      <div style={{ ...styles.card, marginTop: 16, display: "flex", alignItems: "center", gap: 16 }}>
+        <div style={{ color: "#C4A35A" }}><Icons.MapPin /></div>
+        <div>
+          <h4 style={{ margin: "0 0 4px", fontSize: 17 }}>Parkméiglechkeeten</h4>
+          <p style={{ margin: 0, fontSize: 14, color: "#6B5D4D" }}>
+            Parkplazen direkt beim Katechesesall a ronderëm d'Kierch Suessem. Kuckt d'Kaart op der Kierchen-Säit.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderKommioun = () => (
+    <div style={styles.section}>
+      <h2 style={styles.sectionTitle}>Éischt Helleg Kommioun</h2>
+      <p style={styles.sectionSub}>Alles ronderëm d'Virbereedung an d'Feier</p>
+
+      <Editable id="kommioun-intro"
+        defaultText="D'Éischt Helleg Kommioun ass e wichtege Schratt am Glawensliewe vun de Kanner. D'Virbereedung geschitt am Kader vun der Kateches, mat speziellen Aktivitéiten a Proben."
+        as="p" />
+
+      {/* Events */}
+      <h3 style={{ ...styles.sectionTitle, fontSize: 24, marginTop: 40, marginBottom: 20 }}>Evenementer</h3>
+      <div style={{ display: "grid", gap: 12 }}>
+        {EVENTS.filter(e => e.tag === "Kommioun").map((ev, i) => (
+          <div key={i} style={{
+            ...styles.card, display: "flex", alignItems: "center", gap: 20,
+          }}>
+            <div style={{
+              minWidth: 50, height: 50, borderRadius: 8,
+              background: "#8B6F7B20", color: "#8B6F7B",
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              fontWeight: 700,
+            }}>
+              <span style={{ fontSize: 18, lineHeight: 1 }}>{ev.date.split(" ")[0]}</span>
+              <span style={{ fontSize: 10 }}>{ev.date.split(" ")[1]}</span>
+            </div>
+            <div>
+              <h4 style={{ margin: "0 0 4px", fontSize: 16 }}>{ev.title}</h4>
+              <span style={{ fontSize: 13, color: "#8B7D6B" }}>{ev.location}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Tunique */}
+      <div style={{ ...styles.card, marginTop: 32, display: "flex", gap: 20 }}>
+        <div style={{
+          minWidth: 64, height: 64, borderRadius: 12,
+          background: "linear-gradient(135deg, #F5F0E8, #E8DDD0)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 32,
+        }}>👗</div>
+        <div>
+          <h3 style={{ margin: "0 0 8px", fontSize: 20 }}>Tunique</h3>
+          <Editable id="tunique-info"
+            defaultText="D'wäiss Tunique symboliséiert d'Reenung an d'Freed vun der Éischter Helleg Kommioun. Informatiounen iwwer Gréissten an Oflësung ginn am Viraus matgedeelt." />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderKierchen = () => (
+    <div style={styles.section}>
+      <h2 style={styles.sectionTitle}>Eis Kierchen</h2>
+      <p style={styles.sectionSub}>Dräi Kierchen — eng Gemeinschaft</p>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, marginBottom: 40 }}>
+        {CHURCHES.map((ch, i) => (
+          <div key={i} style={{
+            ...styles.card, textAlign: "center",
+            opacity: animatedIn ? 1 : 0,
+            transform: animatedIn ? "translateY(0)" : "translateY(20px)",
+            transition: `all 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${i * 0.15}s`,
+          }}>
+            <div style={{
+              fontSize: 48, marginBottom: 16,
+              filter: "grayscale(0.3)",
+            }}>{ch.img}</div>
+            <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 600, margin: "0 0 8px" }}>{ch.name}</h3>
+            <span style={styles.tag("#7B8F6B")}>{ch.type}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Summer/Winter explanation */}
+      <div style={{
+        ...styles.card,
+        background: "linear-gradient(135deg, #F5F0E8, #FAF8F5)",
+        borderLeft: "4px solid #C4A35A",
+      }}>
+        <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, marginBottom: 12 }}>
+          Summer- & Wanterkierch
+        </h3>
+        <Editable id="summer-winter"
+          defaultText="Am Wanter gëtt nëmmen eng Kierch geheitzt — dat ass d'Wanterkierch. All Gottesdéngschter sinn dann do. Am Summer wiesselt d'Sonndessmass all Woch an eng aner Kierch (Suessem, Bieles, Zolwer) — dat ass d'Summerkierch. Esou kënnt Dir verschidden Kierche kenneléieren."
+          as="p" />
+      </div>
+
+      {/* Mass Schedule in churches */}
+      <h3 style={{ ...styles.sectionTitle, fontSize: 24, marginTop: 40, marginBottom: 20 }}>Massenziedel</h3>
+      <div style={{ display: "grid", gap: 8 }}>
+        {MASS_SCHEDULE.map((m, i) => (
+          <div key={i} style={{
+            display: "flex", alignItems: "center", gap: 16, padding: "14px 20px",
+            background: "#FFFFFF", borderRadius: 8, border: "1px solid rgba(196,163,90,0.1)",
+          }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 6, color: "#C4A35A" }}>
+              <Icons.Clock /> {m.time}
+            </span>
+            <span style={{ fontWeight: 600, flex: 1 }}>{m.church}</span>
+            <span style={{ color: "#8B7D6B", fontSize: 14 }}>{m.day} — {m.type}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Parking */}
+      <div style={{ ...styles.card, marginTop: 32 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+          <Icons.MapPin />
+          <h3 style={{ margin: 0, fontSize: 20 }}>Parkméiglechkeeten</h3>
+        </div>
+        <p style={{ margin: 0, fontSize: 15, color: "#6B5D4D" }}>
+          Ronderëm all dräi Kierche ginn et Parkplazen. Fir genee Standuerter, kuckt d'Kaart hei ënnen.
+        </p>
+        <div style={{
+          marginTop: 16, height: 200, borderRadius: 10,
+          background: "#E8DDD0", display: "flex", alignItems: "center", justifyContent: "center",
+          color: "#8B7D6B", fontSize: 14, fontStyle: "italic",
+        }}>
+          🗺️ Kaart gëtt hei ugewisen (Google Maps Embed)
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDocuments = () => (
+    <div style={styles.section}>
+      <h2 style={styles.sectionTitle}>Dokumenter</h2>
+      <p style={styles.sectionSub}>Lidderprogrammer, Fürbitte, Formulairen an méi</p>
+
+      {isAdmin && (
+        <div style={{
+          ...styles.card, borderStyle: "dashed", borderWidth: 2,
+          borderColor: "rgba(196,163,90,0.4)", background: "#FAF8F5",
+          textAlign: "center", padding: 40, marginBottom: 32, cursor: "pointer",
+        }}>
+          <div style={{ color: "#C4A35A", marginBottom: 12 }}><Icons.Upload /></div>
+          <p style={{ fontWeight: 600, margin: "0 0 8px", color: "#4A3B2A" }}>Neit Dokument eroplueden</p>
+          <p style={{ fontSize: 13, color: "#8B7D6B", margin: 0 }}>PDF, Word oder aner Fichieren — fir jiddereen sichtbar</p>
+        </div>
+      )}
+
+      <div style={{ display: "grid", gap: 12 }}>
+        {DOCUMENTS.map((doc, i) => (
+          <div key={i} style={{
+            ...styles.card, display: "flex", alignItems: "center", gap: 16,
+            padding: "18px 24px",
+          }}>
+            <div style={{
+              minWidth: 44, height: 44, borderRadius: 8,
+              background: "#C4A35A15", color: "#C4A35A",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <Icons.FileText />
+            </div>
+            <div style={{ flex: 1 }}>
+              <h4 style={{ margin: "0 0 4px", fontSize: 16 }}>{doc.name}</h4>
+              <span style={{ fontSize: 12, color: "#8B7D6B" }}>{doc.date} · {doc.type}</span>
+            </div>
+            <button style={{
+              ...styles.outlineBtn, padding: "8px 16px", fontSize: 13,
+            }}>
+              <Icons.Download /> Eroflueden
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderBenevolen = () => (
+    <div style={styles.section}>
+      <h2 style={styles.sectionTitle}>Benevolen</h2>
+      <p style={styles.sectionSub}>Mir brauchen Äer Hëllef — mellt Iech!</p>
+
+      <Editable id="benevolen-intro"
+        defaultText="Eis Poar lieft vun der aktiver Matmaachung vu Benevolen. Hei gesitt Dir Aufgaben wou nach Leit gesicht ginn. Mellt Iech einfach beim Sekretariat oder per Email."
+        as="p" />
+
+      <div style={{ display: "grid", gap: 12, marginTop: 32 }}>
+        {BENEVOL_TASKS.map((t, i) => (
+          <div key={i} style={{
+            ...styles.card, display: "flex", alignItems: "center", gap: 20,
+          }}>
+            <div style={{ flex: 1 }}>
+              <h4 style={{ margin: "0 0 6px", fontSize: 17 }}>{t.task}</h4>
+              <span style={{ fontSize: 13, color: "#8B7D6B" }}>{t.date}</span>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{
+                fontSize: 14, fontWeight: 600,
+                color: t.filled < t.needed ? "#C4A35A" : "#7B8F6B",
+              }}>
+                {t.filled} / {t.needed} Leit
+              </div>
+              <div style={{
+                marginTop: 6, height: 4, width: 80, borderRadius: 2,
+                background: "#E8DDD0", overflow: "hidden",
+              }}>
+                <div style={{
+                  height: "100%", borderRadius: 2,
+                  width: `${(t.filled / t.needed) * 100}%`,
+                  background: t.filled < t.needed ? "#C4A35A" : "#7B8F6B",
+                  transition: "width 0.5s",
+                }} />
+              </div>
+            </div>
+            {t.filled < t.needed && (
+              <button style={{ ...styles.goldBtn, padding: "10px 20px", fontSize: 13 }}>
+                Matmaachen
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderFAQ = () => (
+    <div style={styles.section}>
+      <h2 style={styles.sectionTitle}>Heefeg Froen</h2>
+      <p style={styles.sectionSub}>Äntwerten op Äer Froen ronderëm d'Poar</p>
+
+      {/* Sakramenter */}
+      <div style={{ ...styles.card, borderLeft: "4px solid #8B6F7B", marginBottom: 32 }}>
+        <h3 style={{ fontSize: 20, fontWeight: 600, margin: "0 0 12px" }}>Sakramenter & Anbetung</h3>
+        <Editable id="sakramenter-info"
+          defaultText="Anbetung: All Donneschdeg 17:00–18:00 an der Kierch Suessem. Beichtméiglechkeeten: Op Ufro oder 30 Minutten virun der Mass. Sakramenter: Daf, Kommioun, Firmung, Bestattung — kontaktéiert de Sekretariat fir méi Informatiounen." />
+      </div>
+
+      {/* FAQ Accordion */}
+      <div style={{ display: "grid", gap: 8 }}>
+        {FAQ_ITEMS.map((faq, i) => (
+          <div key={i} style={{
+            ...styles.card, padding: 0, cursor: "pointer", overflow: "hidden",
+          }} onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}>
+            <div style={{
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+              padding: "20px 24px",
+            }}>
+              <h4 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{faq.q}</h4>
+              <span style={{
+                transform: expandedFaq === i ? "rotate(90deg)" : "rotate(0)",
+                transition: "transform 0.3s", color: "#C4A35A",
+              }}>
+                <Icons.ChevronRight />
+              </span>
+            </div>
+            {expandedFaq === i && (
+              <div style={{
+                padding: "0 24px 20px", color: "#6B5D4D", fontSize: 15,
+                borderTop: "1px solid rgba(196,163,90,0.1)",
+                paddingTop: 16,
+              }}>
+                {faq.a}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Video: Katholisch den Kindern erklärt */}
+      <div style={{ ...styles.card, marginTop: 32, textAlign: "center" }}>
+        <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, marginBottom: 8 }}>
+          Katholesch de Kanner erkläert
+        </h3>
+        <p style={{ fontSize: 14, color: "#8B7D6B", marginBottom: 16 }}>
+          E Video fir Kanner iwwert de katholesche Glawen
+        </p>
+        <div style={{
+          height: 200, borderRadius: 10,
+          background: "#2C2419", display: "flex", alignItems: "center", justifyContent: "center",
+          color: "#C4A35A", fontSize: 14,
+        }}>
+          ▶ Video Placeholder
+        </div>
+      </div>
+    </div>
+  );
+
+  const pages = {
+    home: renderHome,
+    kateches: renderKateches,
+    kommioun: renderKommioun,
+    kierchen: renderKierchen,
+    documents: renderDocuments,
+    benevolen: renderBenevolen,
+    faq: renderFAQ,
+  };
+
+  return (
+    <div style={styles.root}>
+      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet" />
+
+      {/* Admin Bar */}
+      {isAdmin && (
+        <div style={styles.adminBar}>
+          <span><Icons.Lock /> ADMIN MODUS — Klickt op ✎ fir Texter z'änneren</span>
+          <button onClick={() => setIsAdmin(false)} style={{
+            background: "rgba(196,163,90,0.2)", border: "1px solid rgba(196,163,90,0.4)",
+            color: "#C4A35A", padding: "6px 16px", borderRadius: 6,
+            cursor: "pointer", fontSize: 13, fontWeight: 600,
+          }}>Ausloggen</button>
+        </div>
+      )}
+
+      {/* Nav */}
+      <nav style={styles.nav}>
+        <div style={styles.navInner}>
+          <div style={styles.logo} onClick={() => setCurrentPage("home")}>
+            <Icons.Cross size={28} />
+            <span>Poar Suessem</span>
+          </div>
+
+          {/* Desktop nav */}
+          <div style={{ ...styles.navLinks, display: "flex" }}
+            className="desktop-nav">
+            {nav.map(n => (
+              <button key={n.id} style={styles.navLink(currentPage === n.id)}
+                onClick={() => setCurrentPage(n.id)}>
+                {n.label}
+              </button>
+            ))}
+            {!isAdmin && (
+              <button onClick={() => setShowLogin(true)} style={{
+                ...styles.navLink(false), opacity: 0.5, fontSize: 13,
+                display: "flex", alignItems: "center", gap: 4,
+              }}>
+                <Icons.Lock /> Login
+              </button>
+            )}
+          </div>
+
+          {/* Mobile menu button */}
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            style={{ background: "none", border: "none", cursor: "pointer", display: "none" }}
+            className="mobile-menu-btn">
+            <Icons.Menu />
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div style={styles.mobileMenu}>
+          <button onClick={() => setMobileMenuOpen(false)}
+            style={{ position: "absolute", top: 20, right: 20, background: "none", border: "none", cursor: "pointer" }}>
+            <Icons.Close />
+          </button>
+          {nav.map(n => (
+            <button key={n.id} onClick={() => { setCurrentPage(n.id); setMobileMenuOpen(false); }}
+              style={{
+                ...styles.navLink(currentPage === n.id),
+                fontSize: 20, padding: "12px 32px",
+              }}>
+              {n.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Login Modal */}
+      {showLogin && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 300,
+          background: "rgba(44,36,25,0.6)", backdropFilter: "blur(8px)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: 24,
+        }} onClick={() => setShowLogin(false)}>
+          <div style={{
+            background: "#FAF8F5", borderRadius: 16, padding: 40,
+            maxWidth: 400, width: "100%",
+            boxShadow: "0 24px 64px rgba(0,0,0,0.2)",
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ textAlign: "center", marginBottom: 24 }}>
+              <Icons.Cross size={32} />
+              <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginTop: 12 }}>
+                Admin Login
+              </h3>
+            </div>
+            <div style={{ display: "grid", gap: 16 }}>
+              <input type="text" placeholder="Benotzer" value={loginUser}
+                onChange={e => setLoginUser(e.target.value)}
+                style={{
+                  width: "100%", padding: "14px 16px", border: "1px solid rgba(196,163,90,0.3)",
+                  borderRadius: 8, fontSize: 15, fontFamily: "'Crimson Pro', serif",
+                  background: "#FFFFFF", boxSizing: "border-box",
+                  outline: "none",
+                }} />
+              <input type="password" placeholder="Passwuert" value={loginPass}
+                onChange={e => setLoginPass(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleLogin()}
+                style={{
+                  width: "100%", padding: "14px 16px", border: "1px solid rgba(196,163,90,0.3)",
+                  borderRadius: 8, fontSize: 15, fontFamily: "'Crimson Pro', serif",
+                  background: "#FFFFFF", boxSizing: "border-box",
+                  outline: "none",
+                }} />
+              <button style={{ ...styles.goldBtn, justifyContent: "center", width: "100%" }}
+                onClick={handleLogin}>
+                Aloggen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingSection && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 300,
+          background: "rgba(44,36,25,0.6)", backdropFilter: "blur(8px)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: 24,
+        }}>
+          <div style={{
+            background: "#FAF8F5", borderRadius: 16, padding: 32,
+            maxWidth: 560, width: "100%",
+            boxShadow: "0 24px 64px rgba(0,0,0,0.2)",
+          }}>
+            <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 400, marginBottom: 16 }}>
+              Text änneren
+            </h3>
+            <textarea value={editText} onChange={e => setEditText(e.target.value)}
+              rows={6} style={{
+                width: "100%", padding: 16, border: "1px solid rgba(196,163,90,0.3)",
+                borderRadius: 8, fontSize: 15, fontFamily: "'Crimson Pro', serif",
+                resize: "vertical", boxSizing: "border-box",
+                lineHeight: 1.6, outline: "none",
+              }} />
+            <div style={{ display: "flex", gap: 12, marginTop: 16, justifyContent: "flex-end" }}>
+              <button onClick={() => setEditingSection(null)} style={styles.outlineBtn}>Ofbriechen</button>
+              <button onClick={saveEdit} style={styles.goldBtn}>Späicheren</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Page Content */}
+      <main>{pages[currentPage]()}</main>
+
+      {/* Footer */}
+      <footer style={styles.footer}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 16, color: "#C4A35A" }}>
+          <Icons.Cross size={28} />
+        </div>
+        <p style={{
+          fontFamily: "'Cormorant Garamond', serif", fontSize: 20,
+          color: "#C4A35A", marginBottom: 4,
+        }}>Poar Suessem</p>
+        <p style={{ fontSize: 13, marginBottom: 16 }}>
+          Kateches · Kommioun · Kierchen · Gemeinschaft
+        </p>
+        <p style={{ fontSize: 12, opacity: 0.6 }}>
+          © 2026 Paroisse de Sanem. All Rechter reservéiert.
+        </p>
+      </footer>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .desktop-nav { display: none !important; }
+          .mobile-menu-btn { display: block !important; }
+        }
+        @media (min-width: 769px) {
+          .mobile-menu-btn { display: none !important; }
+        }
+        * { box-sizing: border-box; }
+        button:hover { opacity: 0.9; }
+        ::selection { background: rgba(196,163,90,0.3); }
+      `}</style>
+    </div>
+  );
+}
